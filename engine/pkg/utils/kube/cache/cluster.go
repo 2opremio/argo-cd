@@ -62,7 +62,7 @@ type ClusterCache interface {
 	Invalidate(settingsCallback func(*rest.Config, []string, Settings) (*rest.Config, []string, Settings))
 	GetNamespaceTopLevelResources(namespace string) map[kube.ResourceKey]*Resource
 	IterateHierarchy(key kube.ResourceKey, action func(resource *Resource, namespaceResources map[kube.ResourceKey]*Resource))
-	IsNamespaced(gk schema.GroupKind) bool
+	IsNamespaced(gk schema.GroupKind) (bool, error)
 	GetManagedLiveObjs(targetObjs []*unstructured.Unstructured, isManaged func(r *Resource) bool) (map[kube.ResourceKey]*unstructured.Unstructured, error)
 	GetClusterInfo() ClusterInfo
 	SetPopulateResourceInfoHandler(handler OnPopulateResourceInfoHandler)
@@ -537,11 +537,12 @@ func (c *clusterCache) IterateHierarchy(key kube.ResourceKey, action func(resour
 	}
 }
 
-func (c *clusterCache) IsNamespaced(gk schema.GroupKind) bool {
-	if api, ok := c.apisMeta[gk]; ok && !api.namespaced {
-		return false
+func (c *clusterCache) IsNamespaced(gk schema.GroupKind) (bool, error) {
+	api, ok := c.apisMeta[gk]
+	if !ok {
+		return false, kube.ErrResourceNotFound
 	}
-	return true
+	return api.namespaced, nil
 }
 
 func (c *clusterCache) GetManagedLiveObjs(targetObjs []*unstructured.Unstructured, isManaged func(r *Resource) bool) (map[kube.ResourceKey]*unstructured.Unstructured, error) {

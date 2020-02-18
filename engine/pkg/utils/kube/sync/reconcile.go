@@ -77,7 +77,8 @@ func Reconcile(targetObjs []*unstructured.Unstructured, liveObjByKey map[kube.Re
 	for i, obj := range targetObjs {
 		gvk := obj.GroupVersionKind()
 		ns := text.FirstNonEmpty(obj.GetNamespace(), namespace)
-		if namespaced := resInfo.IsNamespaced(obj.GroupVersionKind().GroupKind()); !namespaced {
+		namespaced, err := resInfo.IsNamespaced(obj.GroupVersionKind().GroupKind())
+		if err != nil || !namespaced {
 			ns = ""
 		}
 		key := kubeutil.NewResourceKey(gvk.Group, gvk.Kind, ns, obj.GetName())

@@ -3,6 +3,7 @@ package kube
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -48,8 +49,10 @@ const (
 	APIServiceKind               = "APIService"
 )
 
+var ErrResourceNotFound = errors.New("resource not found")
+
 type ResourceInfoProvider interface {
-	IsNamespaced(gk schema.GroupKind) bool
+	IsNamespaced(gk schema.GroupKind) (bool, error)
 }
 
 type ResourceKey struct {

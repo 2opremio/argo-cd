@@ -37,8 +37,8 @@ import (
 type resourceInfoProviderStub struct {
 }
 
-func (r *resourceInfoProviderStub) IsNamespaced(_ schema.GroupKind) bool {
-	return false
+func (r *resourceInfoProviderStub) IsNamespaced(gk schema.GroupKind) (bool, error) {
+	return false, nil
 }
 
 type managedResource struct {
